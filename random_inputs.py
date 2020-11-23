@@ -6,8 +6,8 @@ import _pickle as pickle
 num_students = 50
 smax = round(random.uniform(50, 100), 3)
 dict = {}
-for i in range(1, num_students+1):
-	for j in range(1, num_students+1):
+for i in range(num_students):
+	for j in range(num_students):
 		if (i, j) not in dict and i != j and (j,i) not in dict:
 			dict[(i,j)] = (round(random.uniform(0, 36), 3), round(random.uniform(3, 45), 3))
 
