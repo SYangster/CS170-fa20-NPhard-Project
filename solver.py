@@ -84,7 +84,7 @@ def generate_start_state(G, s):
         students = []
         for student in (G.adjacency()):
             students.append(student[0])
-        k = np.random.randint(1, len(students)/2) #HYPERPARAMETER: (maybe do binary search) use to pick range of random room numbers
+        k = np.random.randint(1, len(students)) #HYPERPARAMETER: (maybe do binary search) use to pick range of random room numbers
 
         invalid_sol = False
         start_state = {}
