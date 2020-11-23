@@ -18,12 +18,11 @@ def solve(G, s):
         k: Number of breakout rooms
     """
 
-    # TODO: your code here!
+    #np.random.seed(99)
 
     # print(s)
     #print(list(G.adjacency()))
-    room_mapping = {}    
-    #np.random.seed(99)
+    #room_mapping = {}    
     room_mapping = generate_start_state(G, s)
     
     print("random: " + str(room_mapping))
@@ -42,7 +41,7 @@ def solve(G, s):
     #next_step = combine_step(G, s, num_students, room_mapping)
     next_step = take_step(G, s, len(room_mapping), room_mapping, False, num_students)
     previous_step = copy.deepcopy(room_mapping)
-    while (next_step != 0 and steps <= 100):
+    while (next_step != 0 and steps <= 100): #HYPERPARAMETER: how many steps in random walk after finding initial state
         steps += 1
         previous_step = copy.deepcopy(next_step)
         next_step = take_step(G, s, len(next_step), next_step, False, num_students)
@@ -59,16 +58,13 @@ def solve(G, s):
             #print(calculate_happiness(convert_dictionary(previous_greedy), G))
 
         greedy_happiness = calculate_happiness(convert_dictionary(previous_greedy), G) 
+        print(is_valid_solution(convert_dictionary(previous_greedy), G, s, len(previous_greedy))) 
         print("HP: " + str(greedy_happiness))
         print(previous_greedy)
         print("")
         if (greedy_happiness > best_happiness):
             best_happiness = greedy_happiness
             best_D = previous_greedy
-
-
-
-        #print("")
 
     room_mapping = best_D
     # for i in G.adjacency():
@@ -82,13 +78,13 @@ def solve(G, s):
 
     return (convert_dictionary(room_mapping), len(room_mapping))
 
-#maybe use with replacement for random room for random student?
+
 def generate_start_state(G, s):
     while True: 
         students = []
         for student in (G.adjacency()):
             students.append(student[0])
-        k = np.random.randint(1, len(students)*2/3)
+        k = np.random.randint(1, len(students)/2) #HYPERPARAMETER: (maybe do binary search) use to pick range of random room numbers
 
         invalid_sol = False
         start_state = {}
@@ -110,7 +106,7 @@ def generate_start_state(G, s):
                 #     start_state[room] = [student]
 
                 remaining_rooms = [x for x in range(1, k+1)]
-                while (len(remaining_rooms) > 0):
+                while (len(remaining_rooms) > 0): #HYPERPARAMETER: use to determine what fraction of random rooms to try per student
                     start_state = copy.deepcopy(orig_start_state) 
                     room = remaining_rooms.pop(np.random.randint(0, len(remaining_rooms)))
                     if room in start_state:
@@ -175,120 +171,42 @@ def combine_step(G, s, k, room_mapping):
     return room_mapping_check
 
 
-#MAKE DO WHILE
+
 def take_step(G, s, k, room_mapping, greedy_bool, num_students):
-    current_happiness = calculate_happiness(convert_dictionary(room_mapping), G)
-    
-    rand_room_from = random.choice(list(room_mapping.keys()))
-    rand_student = random.choice(room_mapping[rand_room_from])
-    rand_room_to = np.random.randint(0, num_students)
-    while (rand_room_to == rand_room_from):
-        rand_room_to = random.choice(list(room_mapping.keys()))
-
-    room_mapping_check = copy.deepcopy(room_mapping)
-
-    if not rand_room_to in room_mapping_check:
-        room_mapping_check[rand_room_to] = [rand_student]
-        k += 1
-    else:
-        room_mapping_check[rand_room_to].append(rand_student)
-    room_mapping_check[rand_room_from].remove(rand_student)
-    undo_k = False
-    if not room_mapping_check[rand_room_from]:
-        room_mapping_check.pop(rand_room_from)
-        k -= 1
-
-        if (not is_valid_solution(convert_dictionary(room_mapping_check), G, s, k)):
-            undo_k = True
-    
-    stuck = 0
-    
-    epsilon_upper = 1.0
-    epsilon_param = np.random.uniform(0,1)
-    #print(epsilon_param)
-    while (not is_valid_solution(convert_dictionary(room_mapping_check), G, s, k) 
-    or (calculate_happiness(convert_dictionary(room_mapping_check), G) <= current_happiness and (epsilon_param < 0.8) and greedy_bool)):
-        if epsilon_upper > 0.8:
-            epsilon_upper -= 0.003
-        epsilon_param = np.random.uniform(0,epsilon_upper)
-        #print("2 " + str(epsilon_param))
-        if (undo_k):
-            k += 1
-            undo_k = False
-        stuck += 1  
-        if (stuck > 1000):
-            return 0
-       
-        rand_room_from = random.choice(list(room_mapping.keys()))
-        rand_student = random.choice(room_mapping[rand_room_from])
-        rand_room_to = np.random.randint(0, num_students)
-        while (rand_room_to == rand_room_from):
-            rand_room_to = random.choice(list(room_mapping.keys()))
-
-        room_mapping_check = copy.deepcopy(room_mapping)
-        if not rand_room_to in room_mapping_check:
-            room_mapping_check[rand_room_to] = [rand_student]
-            k += 1
-        else:
-            room_mapping_check[rand_room_to].append(rand_student)
-
-        room_mapping_check[rand_room_from].remove(rand_student)
-        if not room_mapping_check[rand_room_from]:
-            room_mapping_check.pop(rand_room_from)
-            k -= 1
-
-            if (not is_valid_solution(convert_dictionary(room_mapping_check), G, s, k)):
-                undo_k = True
-
-    return room_mapping_check
-
-
-
-def take_step2(G, s, k, room_mapping, greedy_bool, num_students):
     current_happiness = calculate_happiness(convert_dictionary(room_mapping), G)
     undo_k = 0 
     stuck = 0
     epsilon_upper = 1.0
+    epsilon_cutoff = 0.8 #I NEED TO FIX THIS, but maybe simulated annealing isn't it
     #print(epsilon_param)
     while (True): 
-        if epsilon_upper > 0.8:
+        if epsilon_upper > epsilon_cutoff: #HYPERPARAMETER: use for temperature/epsilon for chance to go downhill at a step
             epsilon_upper -= 0.003
         epsilon_param = np.random.uniform(0,epsilon_upper)
         #print("2 " + str(epsilon_param))
 
-        if (undo_k):
-            k += undo_k
-            undo_k = 0
-
         stuck += 1  
-        if (stuck > 500):
+        if (stuck > 500): #HYPERPARAMETER: use to determine after how long we are stuck
             return 0
        
         rand_room_from = random.choice(list(room_mapping.keys()))
         rand_student = random.choice(room_mapping[rand_room_from])
         rand_room_to = np.random.randint(0, num_students)
         while (rand_room_to == rand_room_from):
-            rand_room_to = random.choice(list(room_mapping.keys()))
+            rand_room_to = np.random.randint(0, num_students)
 
         room_mapping_check = copy.deepcopy(room_mapping)
-        if not rand_room_to in room_mapping_check:
+        if rand_room_to not in room_mapping_check:
             room_mapping_check[rand_room_to] = [rand_student]
-            k += 1
-            if (not is_valid_solution(convert_dictionary(room_mapping_check), G, s, k)):
-                undo_k = -1
         else:
             room_mapping_check[rand_room_to].append(rand_student)
 
         room_mapping_check[rand_room_from].remove(rand_student)
         if not room_mapping_check[rand_room_from]:
             room_mapping_check.pop(rand_room_from)
-            k -= 1
-
-            if (not is_valid_solution(convert_dictionary(room_mapping_check), G, s, k)):
-                undo_k = 1
         
-        if (not is_valid_solution(convert_dictionary(room_mapping_check), G, s, k) 
-        or (calculate_happiness(convert_dictionary(room_mapping_check), G) <= current_happiness and (epsilon_param < 0.8) and greedy_bool)):
+        if (not is_valid_solution(convert_dictionary(room_mapping_check), G, s, len(room_mapping_check))
+        or (calculate_happiness(convert_dictionary(room_mapping_check), G) <= current_happiness and (epsilon_param < epsilon_cutoff) and greedy_bool)):
             continue 
         else:
             break
@@ -298,7 +216,6 @@ def take_step2(G, s, k, room_mapping, greedy_bool, num_students):
 
 
 # Here's an example of how to run your solver.
-
 # Usage: python3 solver.py test.in
 
 if __name__ == '__main__':
@@ -314,7 +231,7 @@ if __name__ == '__main__':
     max_k = 0
     for student in (G.adjacency()):
         max_k += 1 
-    for i in range(0, 1):
+    for i in range(0, 1): #HYPERPARAMETER: how many iterations of whole algorithm to do
         print("Iteration:" + str(i))
         D, k = solve(G, s)
         assert is_valid_solution(D, G, s, k)
@@ -331,7 +248,7 @@ if __name__ == '__main__':
     print("Total Happiness: {}".format(calculate_happiness(max_D, G)))
 
 
-    write_output_file(D, 'out/test.out')
+    write_output_file(D, 'out/test.out') #FIX OUTPUTS TO GO TO FOLDERS ETC.. different names
 
 
 # For testing a folder of inputs to create a folder of outputs, you can use glob (need to import it)
