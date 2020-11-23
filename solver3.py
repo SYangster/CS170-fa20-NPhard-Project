@@ -22,7 +22,7 @@ def solve(G, s):
 
     # print(s)
     #print(list(G.adjacency()))
-    
+    room_mapping = {}    
     #np.random.seed(99)
     room_mapping = generate_start_state(G, s)
     
@@ -33,24 +33,27 @@ def solve(G, s):
         room_mapping_default[student[0]] = [student[0]]
     num_students = len(room_mapping_default)
 
+    #room_mapping = room_mapping_default
+
     best_happiness = 0
     best_D = copy.deepcopy(room_mapping)
 
     steps = 0
-    #next_step = take_step2(G, s, k, room_mapping, False, num_students)
-    next_step = take_step2(G, s, len(room_mapping), room_mapping, False, num_students)
+    #next_step = combine_step(G, s, num_students, room_mapping)
+    next_step = take_step(G, s, len(room_mapping), room_mapping, False, num_students)
     previous_step = copy.deepcopy(room_mapping)
     while (next_step != 0 and steps <= 100):
         steps += 1
         previous_step = copy.deepcopy(next_step)
-        next_step = take_step2(G, s, len(next_step), next_step, False, num_students)
+        next_step = take_step(G, s, len(next_step), next_step, False, num_students)
+        #next_step = combine_step(G, s, num_students, room_mapping) 
 
         print("STEP " + str(steps) + " " + str(next_step))
 
         greedy_step = copy.deepcopy(previous_step)
         while (greedy_step != 0):
             previous_greedy = copy.deepcopy(greedy_step)
-            greedy_step = take_step2(G, s, len(greedy_step), greedy_step, True, num_students)
+            greedy_step = take_step(G, s, len(greedy_step), greedy_step, True, num_students)
             
             #print(previous_greedy)
             #print(calculate_happiness(convert_dictionary(previous_greedy), G))
@@ -68,7 +71,6 @@ def solve(G, s):
         #print("")
 
     room_mapping = best_D
-
     # for i in G.adjacency():
     #     print(i)
     #     print("")
@@ -79,20 +81,20 @@ def solve(G, s):
     print(room_mapping)
 
     return (convert_dictionary(room_mapping), len(room_mapping))
-    pass
 
-
+#maybe use with replacement for random room for random student?
 def generate_start_state(G, s):
     while True: 
         students = []
         for student in (G.adjacency()):
             students.append(student[0])
-        k = np.random.randint(1, len(students)/2 - 1)
+        k = np.random.randint(1, len(students)*2/3)
 
         invalid_sol = False
         start_state = {}
      
         while students:
+            print(start_state)
             #print(students)
             if invalid_sol:
                 break
@@ -100,16 +102,28 @@ def generate_start_state(G, s):
 
             while True:
                 orig_start_state = copy.deepcopy(start_state)
-                room = np.random.randint(0, k)
                 student = remaining_students.pop(np.random.randint(0, len(remaining_students)))
-                if room in start_state:
-                    start_state[room].append(student)
-                else:
-                    start_state[room] = [student]
+                # room = np.random.randint(0, k)
+                # if room in start_state:
+                #     start_state[room].append(student)
+                # else:
+                #     start_state[room] = [student]
+
+                remaining_rooms = [x for x in range(1, k+1)]
+                while (len(remaining_rooms) > 0):
+                    start_state = copy.deepcopy(orig_start_state) 
+                    room = remaining_rooms.pop(np.random.randint(0, len(remaining_rooms)))
+                    if room in start_state:
+                        start_state[room].append(student)
+                    else:
+                        start_state[room] = [student]
+
+                    if is_valid_solution(convert_dictionary(start_state), G, s, len(start_state)):
+                        break
 
                 #maybe rewrite valid solution checker for solutions not with all students
                 if is_valid_solution(convert_dictionary(start_state), G, s, len(start_state)):
-                    print(start_state)
+                    #print(start_state)
                     students.remove(student)
                     break
                 elif not remaining_students:
@@ -125,7 +139,7 @@ def generate_start_state(G, s):
 
 
 
-def take_step(G, s, k, room_mapping):
+def combine_step(G, s, k, room_mapping):
     # print(list(room_mapping.keys()))
     rand_room_from = random.choice(list(room_mapping.keys()))
 
@@ -143,7 +157,7 @@ def take_step(G, s, k, room_mapping):
     #print(room_mapping_check)
     while (not is_valid_solution(convert_dictionary(room_mapping_check), G, s, k)):
         stuck += 1
-        if (stuck > 500):
+        if (stuck > 1200):
             return 0
         k += 1
 
@@ -162,7 +176,7 @@ def take_step(G, s, k, room_mapping):
 
 
 #MAKE DO WHILE
-def take_step2(G, s, k, room_mapping, greedy_bool, num_students):
+def take_step(G, s, k, room_mapping, greedy_bool, num_students):
     current_happiness = calculate_happiness(convert_dictionary(room_mapping), G)
     
     rand_room_from = random.choice(list(room_mapping.keys()))
@@ -202,7 +216,7 @@ def take_step2(G, s, k, room_mapping, greedy_bool, num_students):
             k += 1
             undo_k = False
         stuck += 1  
-        if (stuck > 500):
+        if (stuck > 1000):
             return 0
        
         rand_room_from = random.choice(list(room_mapping.keys()))
@@ -230,6 +244,56 @@ def take_step2(G, s, k, room_mapping, greedy_bool, num_students):
 
 
 
+def take_step2(G, s, k, room_mapping, greedy_bool, num_students):
+    current_happiness = calculate_happiness(convert_dictionary(room_mapping), G)
+    undo_k = 0 
+    stuck = 0
+    epsilon_upper = 1.0
+    #print(epsilon_param)
+    while (True): 
+        if epsilon_upper > 0.8:
+            epsilon_upper -= 0.003
+        epsilon_param = np.random.uniform(0,epsilon_upper)
+        #print("2 " + str(epsilon_param))
+
+        if (undo_k):
+            k += undo_k
+            undo_k = 0
+
+        stuck += 1  
+        if (stuck > 500):
+            return 0
+       
+        rand_room_from = random.choice(list(room_mapping.keys()))
+        rand_student = random.choice(room_mapping[rand_room_from])
+        rand_room_to = np.random.randint(0, num_students)
+        while (rand_room_to == rand_room_from):
+            rand_room_to = random.choice(list(room_mapping.keys()))
+
+        room_mapping_check = copy.deepcopy(room_mapping)
+        if not rand_room_to in room_mapping_check:
+            room_mapping_check[rand_room_to] = [rand_student]
+            k += 1
+            if (not is_valid_solution(convert_dictionary(room_mapping_check), G, s, k)):
+                undo_k = -1
+        else:
+            room_mapping_check[rand_room_to].append(rand_student)
+
+        room_mapping_check[rand_room_from].remove(rand_student)
+        if not room_mapping_check[rand_room_from]:
+            room_mapping_check.pop(rand_room_from)
+            k -= 1
+
+            if (not is_valid_solution(convert_dictionary(room_mapping_check), G, s, k)):
+                undo_k = 1
+        
+        if (not is_valid_solution(convert_dictionary(room_mapping_check), G, s, k) 
+        or (calculate_happiness(convert_dictionary(room_mapping_check), G) <= current_happiness and (epsilon_param < 0.8) and greedy_bool)):
+            continue 
+        else:
+            break
+
+    return room_mapping_check
 
 
 
@@ -248,7 +312,9 @@ if __name__ == '__main__':
     max_happiness = 0
     max_D = {}
     max_k = 0
-    for i in range(0, 10):
+    for student in (G.adjacency()):
+        max_k += 1 
+    for i in range(0, 1):
         print("Iteration:" + str(i))
         D, k = solve(G, s)
         assert is_valid_solution(D, G, s, k)
