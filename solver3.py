@@ -6,7 +6,6 @@ import sys
 import random
 import copy
 
-#from k_means_constrained import KMeansConstrained
 import numpy as np
 
 def solve(G, s):
@@ -20,24 +19,22 @@ def solve(G, s):
     """
 
     # TODO: your code here!
+
     # print(s)
-    
     #print(list(G.adjacency()))
     
-    np.random.seed(99)
+    #np.random.seed(99)
     room_mapping = generate_start_state(G, s)
     
     print("random: " + str(room_mapping))
 
-    # room_mapping = {}
-    k = 0
+    room_mapping_default = {}
     for student in (G.adjacency()):
-        k += 1
-    # k = len(room_mapping)
-    num_students = k
+        room_mapping_default[student[0]] = [student[0]]
+    num_students = len(room_mapping_default)
 
-    current_best_happiness = 0
-    current_best_D = copy.deepcopy(room_mapping)
+    best_happiness = 0
+    best_D = copy.deepcopy(room_mapping)
 
     steps = 0
     #next_step = take_step2(G, s, k, room_mapping, False, num_students)
@@ -62,15 +59,15 @@ def solve(G, s):
         print("HP: " + str(greedy_happiness))
         print(previous_greedy)
         print("")
-        if (greedy_happiness > current_best_happiness):
-            current_best_happiness = greedy_happiness
-            current_best_D = previous_greedy
+        if (greedy_happiness > best_happiness):
+            best_happiness = greedy_happiness
+            best_D = previous_greedy
 
 
 
         #print("")
 
-    room_mapping = current_best_D
+    room_mapping = best_D
 
     # for i in G.adjacency():
     #     print(i)
@@ -90,16 +87,17 @@ def generate_start_state(G, s):
         students = []
         for student in (G.adjacency()):
             students.append(student[0])
-        k = np.random.randint(1, len(students)/2)
+        k = np.random.randint(1, len(students)/2 - 1)
 
         invalid_sol = False
         start_state = {}
      
         while students:
-            print(students)
+            #print(students)
             if invalid_sol:
                 break
             remaining_students = copy.deepcopy(students)
+
             while True:
                 orig_start_state = copy.deepcopy(start_state)
                 room = np.random.randint(0, k)
@@ -119,8 +117,10 @@ def generate_start_state(G, s):
                     break
                 else:
                     start_state = orig_start_state
+
         if not invalid_sol:            
             break
+
     return start_state
 
 
@@ -161,7 +161,7 @@ def take_step(G, s, k, room_mapping):
     return room_mapping_check
 
 
-
+#MAKE DO WHILE
 def take_step2(G, s, k, room_mapping, greedy_bool, num_students):
     current_happiness = calculate_happiness(convert_dictionary(room_mapping), G)
     
@@ -248,7 +248,7 @@ if __name__ == '__main__':
     max_happiness = 0
     max_D = {}
     max_k = 0
-    for i in range(0, 1):
+    for i in range(0, 10):
         print("Iteration:" + str(i))
         D, k = solve(G, s)
         assert is_valid_solution(D, G, s, k)
