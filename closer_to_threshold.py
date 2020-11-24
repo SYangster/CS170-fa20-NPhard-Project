@@ -26,14 +26,16 @@ stress_budget = float(smax) / float(num_rooms)
 for r in solution_dictionary:
 	room = solution_dictionary[r]
 	random_size = stress_budget / len(room)
+	sum_value = 0
 	for i in room:
 		for j in room:
 			if i != j and (i < j):
 				happiness = d[(i, j)][0]
-				if (random_size - 0.5) >= 0:
-					d[(i, j)] = (happiness, round(random.uniform(random_size-0.5, random_size), 3))
+				if (random_size - 0.1) >= 0:
+					d[(i, j)] = (happiness, round(random.uniform(random_size-0.1, random_size), 3))
 				else:
 					d[(i, j)] = (happiness, round(random.uniform(0, random_size), 3))
+
 
 file = 'manual_50_updated.in'	
 with open(file, 'w') as f:
