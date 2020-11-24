@@ -81,6 +81,7 @@ def solve(G, s):
 
 
 def generate_start_state(G, s):
+    print("finding start state...")
     while True: 
         students = []
         for student in (G.adjacency()):
@@ -91,7 +92,7 @@ def generate_start_state(G, s):
         start_state = {}
      
         while students:
-            print(start_state)
+            #print(start_state)
             #print(students)
             if invalid_sol:
                 break
@@ -131,7 +132,7 @@ def generate_start_state(G, s):
 
         if not invalid_sol:            
             break
-
+        #print(start_state)
     return start_state
 
 
@@ -309,7 +310,7 @@ if __name__ == '__main__':
     max_k = 0
     for student in (G.adjacency()):
         max_k += 1 
-    for i in range(0, 1): #HYPERPARAMETER: how many iterations of whole algorithm to do
+    for i in range(0, 2): #HYPERPARAMETER: how many iterations of whole algorithm to do
         print("Iteration:" + str(i))
         D, k = solve(G, s)
         assert is_valid_solution(D, G, s, k)
@@ -320,6 +321,9 @@ if __name__ == '__main__':
             max_happiness = happiness
             max_D = D
             max_k = k
+        print("maxHP: " + str(max_happiness))
+        print("max_D: " + str(max_D))
+        print("")
 
     assert is_valid_solution(max_D, G, s, max_k)
     print("BEST SOL: " + str(max_D))
