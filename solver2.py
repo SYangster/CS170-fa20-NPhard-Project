@@ -85,7 +85,7 @@ def generate_start_state(G, s):
         students = []
         for student in (G.adjacency()):
             students.append(student[0])
-        k = np.random.randint(1, len(students)*2/3) #HYPERPARAMETER: (maybe do binary search) use to pick range of random room numbers
+        k = np.random.randint(1, len(students)/2) #HYPERPARAMETER: (maybe do binary search) use to pick range of random room numbers
 
         invalid_sol = False
         start_state = {}
@@ -187,7 +187,7 @@ def take_step(G, s, k, room_mapping, greedy_bool, num_students):
         #print("2 " + str(epsilon_param))
 
         stuck += 1  
-        if (stuck > 2500): #HYPERPARAMETER: use to determine after how long we are stuck
+        if (stuck > 2500): #HYPERPARAMETER: use to determine after how long we are stuck #CHANGE TO GO THROUGH ALL POSSIBILITIES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             return 0
         rand_room_from = random.choice(list(room_mapping.keys()))
         rand_student = random.choice(room_mapping[rand_room_from])
