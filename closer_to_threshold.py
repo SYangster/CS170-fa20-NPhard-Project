@@ -23,10 +23,24 @@ num_rooms = len(solution_dictionary)
 
 stress_budget = float(smax) / float(num_rooms)
 
+num_pairs = {}
+for r in solution_dictionary:
+	room = tuple(solution_dictionary[r])
+	random_size = stress_budget / len(room)
+	num = 0
+	for i in room:
+		for j in room:
+			if i != j and (i < j):
+				num+=1
+	if num!=0:
+		num_pairs[room] = num
+	else:
+		num_pairs[room] = 1
+
+
 for r in solution_dictionary:
 	room = solution_dictionary[r]
-	random_size = stress_budget / len(room)
-	sum_value = 0
+	random_size = stress_budget / num_pairs[tuple(room)]
 	for i in room:
 		for j in room:
 			if i != j and (i < j):
