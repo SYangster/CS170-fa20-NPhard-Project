@@ -85,7 +85,7 @@ def generate_start_state(G, s):
         students = []
         for student in (G.adjacency()):
             students.append(student[0])
-        k = np.random.randint(1, len(students)) #HYPERPARAMETER: (maybe do binary search) use to pick range of random room numbers
+        k = np.random.randint(1, len(students)/2+3) #HYPERPARAMETER: (maybe do binary search) use to pick range of random room numbers
 
         invalid_sol = False
         start_state = {}
@@ -180,38 +180,117 @@ def take_step(G, s, k, room_mapping, greedy_bool, num_students):
     epsilon_upper = 1.0
     epsilon_cutoff = 1.0 #I NEED TO FIX THIS, but maybe simulated annealing isn't it
     #print(epsilon_param)
-    while (True): 
-        if epsilon_upper > epsilon_cutoff: #HYPERPARAMETER: use for temperature/epsilon for chance to go downhill at a step
-            epsilon_upper -= 0.003
-        epsilon_param = np.random.uniform(0,epsilon_upper)
-        #print("2 " + str(epsilon_param))
+    
+    next_mapping = copy.deepcopy(room_mapping)
 
-        stuck += 1  
-        if (stuck > 10000): #HYPERPARAMETER: use to determine after how long we are stuck #CHANGE TO GO THROUGH ALL POSSIBILITIES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            return 0
-        rand_room_from = random.choice(list(room_mapping.keys()))
-        rand_student = random.choice(room_mapping[rand_room_from])
-        rand_room_to = np.random.randint(0, num_students)
-        while (rand_room_to == rand_room_from):
-            rand_room_to = np.random.randint(0, num_students)
-
-        room_mapping_check = copy.deepcopy(room_mapping)
-        if rand_room_to not in room_mapping_check:
-            room_mapping_check[rand_room_to] = [rand_student]
-        else:
-            room_mapping_check[rand_room_to].append(rand_student)
-
-        room_mapping_check[rand_room_from].remove(rand_student)
-        if not room_mapping_check[rand_room_from]:
-            room_mapping_check.pop(rand_room_from)
+    rooms_from = [room for room in room_mapping.keys()]
+    while(rooms_from):
+        rand_room_from = rooms_from.pop(np.random.randint(0, len(rooms_from)))
+        students = copy.deepcopy(room_mapping[rand_room_from])
         
-        if (not is_valid_solution(convert_dictionary(room_mapping_check), G, s, len(room_mapping_check))
-        or (calculate_happiness(convert_dictionary(room_mapping_check), G) <= current_happiness and (epsilon_param < epsilon_cutoff) and greedy_bool)):
-            continue 
-        else:
-            break
 
-    return room_mapping_check
+        while (students):
+            
+            rand_student = students.pop(np.random.randint(0, len(students)))
+            rooms_to = [room for room in range(0, num_students)]
+            rooms_to.remove(rand_room_from)
+
+            while (rooms_to):
+                            
+                if epsilon_upper > epsilon_cutoff: #hyperparameter: use for temperature/epsilon for chance to go downhill at a step
+                    epsilon_upper -= 0.003
+                epsilon_param = np.random.uniform(0,epsilon_upper)
+
+                next_mapping = copy.deepcopy(room_mapping)
+                rand_room_to = rooms_to.pop(np.random.randint(0, len(rooms_to)))
+                if rand_room_to in room_mapping:
+                    next_mapping[rand_room_to].append(rand_student)
+                else:
+                    next_mapping[rand_room_to] = [rand_student]
+
+
+                next_mapping[rand_room_from].remove(rand_student)
+                if not next_mapping[rand_room_from]:
+                    next_mapping.pop(rand_room_from)
+
+                if (not is_valid_solution(convert_dictionary(next_mapping), G, s, len(next_mapping))
+                or (calculate_happiness(convert_dictionary(next_mapping), G) <= current_happiness and (epsilon_param < epsilon_cutoff) and greedy_bool)):
+                    continue 
+                else:
+                    return next_mapping
+                break
+    return 0
+
+    
+#             remaining_students = copy.deepcopy(students)
+# 
+#             while True:
+#                 orig_start_state = copy.deepcopy(start_state)
+#                 student = remaining_students.pop(np.random.randint(0, len(remaining_students)))
+#                 # room = np.random.randint(0, k)
+#                 # if room in start_state:
+#                 #     start_state[room].append(student)
+#                 # else:
+#                 #     start_state[room] = [student]
+# 
+#                 remaining_rooms = [x for x in range(1, k+1)]
+#                 while (len(remaining_rooms) > 0): #HYPERPARAMETER: use to determine what fraction of random rooms to try per student
+#                     start_state = copy.deepcopy(orig_start_state) 
+#                     room = remaining_rooms.pop(np.random.randint(0, len(remaining_rooms)))
+#                     if room in start_state:
+#                         start_state[room].append(student)
+#                     else:
+#                         start_state[room] = [student]
+# 
+#                     if is_valid_solution(convert_dictionary(start_state), G, s, len(start_state)):
+#                         break
+# 
+#                 #maybe rewrite valid solution checker for solutions not with all students
+#                 if is_valid_solution(convert_dictionary(start_state), G, s, len(start_state)):
+#                     #print(start_state)
+#                     students.remove(student)
+#                     break
+#                 elif not remaining_students:
+#                     invalid_sol = True
+#                     break
+#                 else:
+#                     start_state = orig_start_state
+# 
+# 
+# 
+#     remaining_students = [x for x in range(0, num_students)]
+#     while (remaining_students): 
+#         if epsilon_upper > epsilon_cutoff: #hyperparameter: use for temperature/epsilon for chance to go downhill at a step
+#             epsilon_upper -= 0.003
+#         epsilon_param = np.random.uniform(0,epsilon_upper)
+#         #print("2 " + str(epsilon_param))
+# 
+#         stuck += 1  
+#         if (stuck > 10000): #HYPERPARAMETER: use to determine after how long we are stuck #CHANGE TO GO THROUGH ALL POSSIBILITIES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#             return 0
+#         rand_room_from = random.choice(list(room_mapping.keys()))
+#         rand_student = random.choice(room_mapping[rand_room_from])
+#         rand_room_to = np.random.randint(0, num_students)
+#         while (rand_room_to == rand_room_from):
+#             rand_room_to = np.random.randint(0, num_students)
+# 
+#         room_mapping_check = copy.deepcopy(room_mapping)
+#         if rand_room_to not in room_mapping_check:
+#             room_mapping_check[rand_room_to] = [rand_student]
+#         else:
+#             room_mapping_check[rand_room_to].append(rand_student)
+# 
+#         room_mapping_check[rand_room_from].remove(rand_student)
+#         if not room_mapping_check[rand_room_from]:
+#             room_mapping_check.pop(rand_room_from)
+#         
+#         if (not is_valid_solution(convert_dictionary(room_mapping_check), G, s, len(room_mapping_check))
+#         or (calculate_happiness(convert_dictionary(room_mapping_check), G) <= current_happiness and (epsilon_param < epsilon_cutoff) and greedy_bool)):
+#             continue 
+#         else:
+#             return room_mapping_check
+# 
+#     return 0
 
 
 
