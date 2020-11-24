@@ -1,6 +1,6 @@
 import random
 
-file = 'manual_50.in'
+file = 'manual_20.in'
 d = dict()
 num_students = 0
 smax = 0
@@ -17,7 +17,8 @@ with open(file) as test:
 		s = float(tokens[3])
 		d[(i, j)] = (h, s)
 
-solution_dictionary = {1: [36, 27, 4], 10: [13, 24], 35: [11, 49], 36: [14, 32, 28], 3: [29, 40], 13: [12, 30], 5: [15, 41], 29: [10, 39, 45], 31: [8, 42], 9: [22, 47], 21: [31, 3, 20], 19: [7, 18, 35], 22: [16], 34: [19, 43], 6: [34, 2], 14: [9, 23, 17], 15: [0, 48, 1], 45: [21, 6], 2: [37, 5, 38], 48: [46, 25], 37: [44, 26, 33]}
+#solution_dictionary = {1: [36, 27, 4], 10: [13, 24], 35: [11, 49], 36: [14, 32, 28], 3: [29, 40], 13: [12, 30], 5: [15, 41], 29: [10, 39, 45], 31: [8, 42], 9: [22, 47], 21: [31, 3, 20], 19: [7, 18, 35], 22: [16], 34: [19, 43], 6: [34, 2], 14: [9, 23, 17], 15: [0, 48, 1], 45: [21, 6], 2: [37, 5, 38], 48: [46, 25], 37: [44, 26, 33]}
+solution_dictionary = {10: [17, 18], 9: [11, 16], 1: [1, 7], 4: [9], 11: [13, 5], 7: [14, 6], 2: [2, 19], 3: [4, 3], 8: [12, 15], 13: [8, 0], 15: [10]}
 
 num_rooms = len(solution_dictionary)
 
@@ -51,7 +52,7 @@ for r in solution_dictionary:
 					d[(i, j)] = (happiness, round(random.uniform(0, random_size), 3))
 
 
-file = 'manual_50_updated.in'	
+file = 'manual_20_updated.in'	
 with open(file, 'w') as f:
 	print(num_students, file=f)
 	print(smax, file=f)

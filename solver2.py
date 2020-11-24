@@ -175,7 +175,6 @@ def combine_step(G, s, k, room_mapping):
 
 def take_step(G, s, k, room_mapping, greedy_bool, num_students):
     current_happiness = calculate_happiness(convert_dictionary(room_mapping), G)
-    undo_k = 0 
     stuck = 0
     epsilon_upper = 1.0
     epsilon_cutoff = 1.0 #I NEED TO FIX THIS, but maybe simulated annealing isn't it
