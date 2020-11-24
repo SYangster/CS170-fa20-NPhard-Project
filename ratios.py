@@ -1,7 +1,7 @@
 import random
 import numpy as np
 
-file = 'final_inputs/10.in'
+file = 'final_inputs/20.in'
 d = dict()
 num_students = 0
 smax = 0
@@ -63,14 +63,17 @@ for i in range(1, len(sorted_pairs)-1):
 # ratios[pair]=ratio
 # sorted_ratios[pair] = ratio
 
-# sorted_pairs = (sorted(ratios, key=ratios.get))
-# print(sorted_pairs)
+# sorted_pairs_after = (sorted(ratios, key=ratios.get))
+# print(sorted_pairs_after)
+# for i in range(len(sorted_pairs)):
+# 	if sorted_pairs[i]!=sorted_pairs_after[i]:
+# 		print('here')
 # for pair in sorted_pairs:
 # 	sorted_ratios[pair] = ratios[pair]
 # print(sorted_ratios)
 # print(d)
 
-file = 'manual_10_ratios.in'	
+file = 'manual_20_ratios.in'	
 with open(file, 'w') as f:
 	print(num_students, file=f)
 	print(smax, file=f)
