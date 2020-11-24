@@ -45,8 +45,8 @@ for r in solution_dictionary:
 		for j in room:
 			if i != j and (i < j):
 				happiness = d[(i, j)][0]
-				if (random_size - 0.1) >= 0:
-					d[(i, j)] = (happiness, round(random.uniform(random_size-0.1, random_size), 3))
+				if (random_size - 0.05) >= 0:
+					d[(i, j)] = (happiness, round(random.uniform(random_size-0.05, random_size), 3))
 				else:
 					d[(i, j)] = (happiness, round(random.uniform(0, random_size), 3))
 
