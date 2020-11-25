@@ -24,7 +24,13 @@ def solve(G, s):
     #print(list(G.adjacency()))
     #room_mapping = {}    
     room_mapping = generate_start_state(G, s)
-    
+
+    #room_mapping = {21: [2, 42], 22: [13, 34], 11: [7, 0], 4: [45, 25, 8], 2: [38, 48, 5], 25: [31, 11, 16], 5: [28, 18, 19], 23: [40, 47, 41], 18: [21, 46], 12: [22, 49, 1], 8: [4, 32, 14], 6: [12, 30], 15: [10, 39], 9: [44, 24, 27], 3: [3, 37, 20], 38: [9, 23, 17], 35: [43, 26, 29], 1: [15, 33, 36], 45: [6, 35]}       
+
+    #room_mapping = {10: [17, 18], 9: [11, 16], 1: [1, 7], 4: [9], 11: [13, 5], 7: [14, 6], 2: [2, 19], 3: [4, 3], 8: [12, 15], 13: [8, 0], 15: [10]}
+
+    #room_mapping = {3:[1, 5, 3], 6:[0, 8], 7:[4, 6], 2:[7, 9, 2]}
+
     print("random: " + str(room_mapping))
 
     room_mapping_default = {}
@@ -86,7 +92,7 @@ def generate_start_state(G, s):
         students = []
         for student in (G.adjacency()):
             students.append(student[0])
-        k = np.random.randint(1, len(students)/2+3) #HYPERPARAMETER: (maybe do binary search) use to pick range of random room numbers
+        k = np.random.randint(1, len(students)/2+2) #HYPERPARAMETER: (maybe do binary search) use to pick range of random room numbers
 
         invalid_sol = False
         start_state = {}
@@ -310,7 +316,7 @@ if __name__ == '__main__':
     max_k = 0
     for student in (G.adjacency()):
         max_k += 1 
-    for i in range(0, 2): #HYPERPARAMETER: how many iterations of whole algorithm to do
+    for i in range(0, 1): #HYPERPARAMETER: how many iterations of whole algorithm to do
         print("Iteration:" + str(i))
         D, k = solve(G, s)
         assert is_valid_solution(D, G, s, k)
