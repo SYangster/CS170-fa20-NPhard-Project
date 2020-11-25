@@ -14,11 +14,11 @@ def write_file(num_students):
 				dict[(i,j)] = (round(random.uniform(0, 36), 3), round(random.uniform(1, 26), 3))
 
 
-	file = str(num_students) + '.in'
+	file = 'new' + str(num_students) + '.in'
 	with open(file, 'w') as f:
 	    print(num_students, file=f)
 	    print(smax, file=f)
 	    for x in dict:
 	    	print(x[0], x[1], dict[x][0], dict[x][1], file=f)
 
-write_file(10)
+write_file(20)

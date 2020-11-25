@@ -1,7 +1,7 @@
 import random
 import numpy as np
 
-file = 'final_inputs/20.in'
+file = 'manual_20.in'
 d = dict()
 num_students = 0
 smax = 0
