@@ -246,13 +246,13 @@ def take_step(G, s, k, room_mapping, greedy_bool, num_students):
 
 if __name__ == '__main__':
     assert len(sys.argv) == 5
-    input_path = sys.argv[1]
-    output_path = sys.arg[2]
+    input_path = sys.argv[1] #inputs/small
+    output_path = sys.arg[2] #temp_out/small
     iterations = int(sys.argv[3]) #at least enough to do the binary search
     max_search_iters = int(sys.argv[4]) #500 to 2000
 
 
-    inputs = glob.glob(str(input_path) + '/*') #inputs/small/for input_path in inputs:for input_path in inputs:
+    inputs = glob.glob(str(input_path) + '/*') #inputs/small
     for path in inputs:
     
         head, tail = os.path.split(path)
