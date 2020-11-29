@@ -4,6 +4,7 @@ from utils import is_valid_solution, calculate_happiness, convert_dictionary
 import sys
 import os
 import argparse
+import glob
 
 import random
 import copy
@@ -244,61 +245,66 @@ def take_step(G, s, k, room_mapping, greedy_bool, num_students):
 # Usage: python3 solver.py test.in
 
 if __name__ == '__main__':
-    assert len(sys.argv) == 4
-    path = sys.argv[1]
-    iterations = int(sys.argv[2]) #at least enough to do the binary search
-    max_search_iters = int(sys.argv[3]) #500 to 2000
+    assert len(sys.argv) == 5
+    input_path = sys.argv[1]
+    output_path = sys.arg[2]
+    iterations = int(sys.argv[3]) #at least enough to do the binary search
+    max_search_iters = int(sys.argv[4]) #500 to 2000
 
-    head, tail = os.path.split(path)
 
-    G, s = read_input_file(path)
-    # D, k = solve(G, s)
-    # assert is_valid_solution(D, G, s, k)
-    # print("Total Happiness: {}".format(calculate_happiness(D, G)))
+    inputs = glob.glob(str(input_path) + '/*') #inputs/small/for input_path in inputs:for input_path in inputs:
+    for path in inputs:
     
-    max_happiness = 0
-    max_D = {}
-    max_k = 0
-    for student in (G.adjacency()):
-        max_k += 1 
+        head, tail = os.path.split(path)
 
-    upper_k = 0.5
-    k_ceiling = 1.0
-    k_floor = 0.0
+        G, s = read_input_file(path)
+        # D, k = solve(G, s)
+        # assert is_valid_solution(D, G, s, k)
+        # print("Total Happiness: {}".format(calculate_happiness(D, G)))
+        
+        max_happiness = 0
+        max_D = {}
+        max_k = 0
+        for student in (G.adjacency()):
+            max_k += 1 
 
-    for i in range(0, iterations): #HYPERPARAMETER: how many iterations of whole algorithm to do
-        print("Iteration:" + str(i) + " UpperK: " + str(upper_k))
-        D, k = solve(G, s, upper_k, max_search_iters) #BINARY SEARCH THISSS, 500 to 2000 seems like a good number
-        if D is None:
-            k_floor = upper_k
-            upper_k = upper_k + (k_ceiling-upper_k)/2
-            continue
-        else:
-            k_ceiling = upper_k
-            upper_k = k_floor + (upper_k-k_floor)/2
-            
+        upper_k = 0.5
+        k_ceiling = 1.0
+        k_floor = 0.0
 
-        assert is_valid_solution(D, G, s, k)
-        happiness = calculate_happiness(D, G)
-        print("HP: " + str(happiness))
-        print("")
-        if (happiness > max_happiness):
-            max_happiness = happiness
-            max_D = D
-            max_k = k
-        print("maxHP: " + str(max_happiness))
-        print("max_D: " + str(max_D))
-        print("")
+        for i in range(0, iterations): #HYPERPARAMETER: how many iterations of whole algorithm to do
+            print("Iteration:" + str(i) + " UpperK: " + str(upper_k))
+            D, k = solve(G, s, upper_k, max_search_iters) #BINARY SEARCH THISSS, 500 to 2000 seems like a good number
+            if D is None:
+                k_floor = upper_k
+                upper_k = upper_k + (k_ceiling-upper_k)/2
+                continue
+            else:
+                k_ceiling = upper_k
+                upper_k = k_floor + (upper_k-k_floor)/2
+                
 
-    assert is_valid_solution(max_D, G, s, max_k)
-    print("BEST SOL: " + str(max_D))
-    print("Total Happiness: {}".format(calculate_happiness(max_D, G)))
+            assert is_valid_solution(D, G, s, k)
+            happiness = calculate_happiness(D, G)
+            print("HP: " + str(happiness))
+            print("")
+            if (happiness > max_happiness):
+                max_happiness = happiness
+                max_D = D
+                max_k = k
+            print("maxHP: " + str(max_happiness))
+            print("max_D: " + str(max_D))
+            print("")
 
-    #TODO, script to compare two folders? useful for combining results later
-    #TODO, script to run command with diff parameters for each 10,20,50 type, over a folder for certain number of iterations
-    #TODO, hone in process
-    #TODO, if out file already exists, first compare before overwriting
-    write_output_file_with_hp(max_D, max_happiness, 'out/' + str(tail)[:len(tail)-3] + '.out') #FIX OUTPUTS TO GO TO FOLDERS ETC.. different names
+        assert is_valid_solution(max_D, G, s, max_k)
+        print("BEST SOL: " + str(max_D))
+        print("Total Happiness: {}".format(calculate_happiness(max_D, G)))
+
+        #TODO, script to compare two folders? useful for combining results later
+        #TODO, script to run command with diff parameters for each 10,20,50 type, over a folder for certain number of iterations
+        #TODO, hone in process
+        #TODO, if out file already exists, first compare before overwriting
+        write_output_file_with_hp(max_D, max_happiness, str(output_path) + '/' + basename(normpath(input_path))[:-3]  + '.out') #FIX OUTPUTS TO GO TO FOLDERS ETC.. different names
 
 
 # For testing a folder of inputs to create a folder of outputs, you can use glob (need to import it)
