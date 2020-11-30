@@ -123,3 +123,19 @@ def write_output_file(D, path):
         for key, value in D.items():
             fo.write(str(key) + " " + str(value) + "\n")
         fo.close()
+
+
+def write_output_file_with_hp(D, h, path):
+    """
+    Writes a mapping to an output file
+
+    :param path: str, a path
+    :param D: dict, a mapping
+    :return: None -- creates a text file
+    """
+    with open(path, "w") as fo:
+        fo.write(str(h) + "\n")
+        for key, value in D.items():
+            fo.write(str(key) + " " + str(value) + "\n")
+        fo.close()
+        

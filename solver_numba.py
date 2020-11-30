@@ -1,3 +1,5 @@
+
+
 import networkx as nx
 from parse import read_input_file, write_output_file
 from utils import is_valid_solution, calculate_happiness, convert_dictionary
@@ -7,6 +9,15 @@ import random
 import copy
 
 import numpy as np
+
+from numba import jit, int32
+from numba import njit
+from numba import types
+from numba.typed import Dict
+import numba
+
+
+G = None
 
 def solve(G, s):
     """
@@ -23,8 +34,21 @@ def solve(G, s):
     # print(s)
     #print(list(G.adjacency()))
     #room_mapping = {}    
-    room_mapping = generate_start_state(G, s)
     
+
+    students = []
+    for student in (G.adjacency()):
+        students.append(student[0])
+
+    room_mapping = Dict.empty(key_type=types.uint32, value_type=types.uint32[:],)
+    room_mapping = generate_start_state(s, students)
+
+    #room_mapping = {21: [2, 42], 22: [13, 34], 11: [7, 0], 4: [45, 25, 8], 2: [38, 48, 5], 25: [31, 11, 16], 5: [28, 18, 19], 23: [40, 47, 41], 18: [21, 46], 12: [22, 49, 1], 8: [4, 32, 14], 6: [12, 30], 15: [10, 39], 9: [44, 24, 27], 3: [3, 37, 20], 38: [9, 23, 17], 35: [43, 26, 29], 1: [15, 33, 36], 45: [6, 35]}       
+
+    #room_mapping = {10: [17, 18], 9: [11, 16], 1: [1, 7], 4: [9], 11: [13, 5], 7: [14, 6], 2: [2, 19], 3: [4, 3], 8: [12, 15], 13: [8, 0], 15: [10]}
+
+    #room_mapping = {3:[1, 5, 3], 6:[0, 8], 7:[4, 6], 2:[7, 9, 2]}
+
     print("random: " + str(room_mapping))
 
     room_mapping_default = {}
@@ -79,22 +103,21 @@ def solve(G, s):
 
     return (convert_dictionary(room_mapping), len(room_mapping))
 
-
-def generate_start_state(G, s):
-    print("finding start state...")
+@njit
+def generate_start_state(s, students):
+    #print("finding start state...")
     while True: 
-        students = []
-        for student in (G.adjacency()):
-            students.append(student[0])
-        #k = np.random.randint(1, len(students)/2+3) #HYPERPARAMETER: (maybe do binary search) use to pick range of random room numbers
-
+        #students = []
+        #for student in (G.adjacency()):
+        #    students.append(student[0])
         k = np.random.randint(1, len(students)/2+3) #HYPERPARAMETER: (maybe do binary search) use to pick range of random room numbers
+        #k = np.random.randint(1, len(students)/2+3) #HYPERPARAMETER: (maybe do binary search) use to pick range of random room numbers
 
         invalid_sol = False
         start_state = {}
      
         while students:
-            #print(start_state)
+            print(start_state)
             #print(students)
             if invalid_sol:
                 break
@@ -118,11 +141,11 @@ def generate_start_state(G, s):
                     else:
                         start_state[room] = [student]
 
-                    if is_valid_solution(convert_dictionary(start_state), G, s, len(start_state)):
+                    if is_valid_solution_helper(convert_dictionary(start_state), s, len(start_state)):
                         break
 
                 #maybe rewrite valid solution checker for solutions not with all students
-                if is_valid_solution(convert_dictionary(start_state), G, s, len(start_state)):
+                if is_valid_solution_helper(convert_dictionary(start_state), s, len(start_state)):
                     #print(start_state)
                     students.remove(student)
                     break
@@ -137,7 +160,8 @@ def generate_start_state(G, s):
         #print(start_state)
     return start_state
 
-
+def is_valid_solution_helper(D, s, rooms):
+    return is_valid_solution_helper(D, G, s, rooms)
 
 def combine_step(G, s, k, room_mapping):
     # print(list(room_mapping.keys()))
@@ -175,7 +199,6 @@ def combine_step(G, s, k, room_mapping):
     return room_mapping_check
 
 
-
 def take_step(G, s, k, room_mapping, greedy_bool, num_students):
     current_happiness = calculate_happiness(convert_dictionary(room_mapping), G)
     stuck = 0
@@ -200,7 +223,7 @@ def take_step(G, s, k, room_mapping, greedy_bool, num_students):
             while (rooms_to):
                             
                 if epsilon_upper > epsilon_cutoff: #hyperparameter: use for temperature/epsilon for chance to go downhill at a step
-                    epsilon_upper -= 0.003
+                    epsilon_upper -= 0.006
                 epsilon_param = np.random.uniform(0,epsilon_upper)
 
                 next_mapping = copy.deepcopy(room_mapping)
