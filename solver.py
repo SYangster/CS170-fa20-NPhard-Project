@@ -31,9 +31,13 @@ def solve(G, s, upper_k, max_search_iters):
         room_mapping_default[student[0]] = [student[0]]
     num_students = len(room_mapping_default)
     #room_mapping = room_mapping_default
+    
+    upper_k_students = int(num_students * upper_k)
+    if upper_k_students <= 2:
+        upper_k_students = 2
 
     #room_mapping = {}    
-    room_mapping = generate_start_state(G, s, int(num_students * upper_k), max_search_iters)
+    room_mapping = generate_start_state(G, s, upper_k_students, max_search_iters)
     if room_mapping is None:
         return (None, None)
 
@@ -247,7 +251,7 @@ def take_step(G, s, k, room_mapping, greedy_bool, num_students):
 if __name__ == '__main__':
     assert len(sys.argv) == 5
     input_path = sys.argv[1] #inputs/small
-    output_path = sys.arg[2] #temp_out/small
+    output_path = sys.argv[2] #temp_out/small
     iterations = int(sys.argv[3]) #at least enough to do the binary search
     max_search_iters = int(sys.argv[4]) #500 to 2000
 
@@ -282,7 +286,6 @@ if __name__ == '__main__':
             else:
                 k_ceiling = upper_k
                 upper_k = k_floor + (upper_k-k_floor)/2
-                
 
             assert is_valid_solution(D, G, s, k)
             happiness = calculate_happiness(D, G)
@@ -304,8 +307,21 @@ if __name__ == '__main__':
         #TODO, script to run command with diff parameters for each 10,20,50 type, over a folder for certain number of iterations
         #TODO, hone in process
         #TODO, if out file already exists, first compare before overwriting
-        write_output_file_with_hp(max_D, max_happiness, str(output_path) + '/' + basename(normpath(input_path))[:-3]  + '.out') #FIX OUTPUTS TO GO TO FOLDERS ETC.. different names
+        #write_output_file_with_hp(max_D, max_happiness, str(output_path) + '/' + basename(normpath(input_path))[:-3]  + '.out') #FIX OUTPUTS TO GO TO FOLDERS ETC.. different names
 
+        if (os.path.exists(str(output_path) + '/' + str(tail)[:len(tail)-3]  + '.out')):
+            with open(str(output_path) + '/' + str(tail)[:len(tail)-3]  + '.out', "r") as fo:
+                nodes = set()
+                rooms = set()
+                D = {}
+                lines = fo.read().splitlines()
+                fo.close()
+                existing_happiness = lines[0]
+
+            if max_happiness > float(existing_happiness):
+                write_output_file_with_hp(max_D, max_happiness, str(output_path) + '/' + str(tail)[:len(tail)-3]  + '.out') #FIX OUTPUTS TO GO TO FOLDERS ETC.. different names
+        else:
+            write_output_file_with_hp(max_D, max_happiness, str(output_path) + '/' + str(tail)[:len(tail)-3]  + '.out') #FIX OUTPUTS TO GO TO FOLDERS ETC.. different names
 
 # For testing a folder of inputs to create a folder of outputs, you can use glob (need to import it)
 # if __name__ == '__main__':
