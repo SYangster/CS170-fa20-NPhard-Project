@@ -41,4 +41,4 @@ if __name__ == '__main__':
             else:
                 shutil.move(filepath, best_file_path)
 
-    print("Updated /best_out")
+        print("Updated /best_out")
