@@ -24,6 +24,7 @@ if __name__ == '__main__':
     temp_out = sys.argv[1]
 
     #for filepath in glob.iglob(temp_out + '/**/*', recursive=True):
+    counter = 0
     for filepath in glob.iglob(temp_out + '/*', recursive=True):
 
         if filepath.endswith(".out"):
@@ -37,8 +38,9 @@ if __name__ == '__main__':
                 filepath_with_best = compare(best_file_path, filepath)
 
                 if best_file_path != filepath_with_best:
+                    counter += 1
                     shutil.move(filepath_with_best, best_file_path)
             else:
                 shutil.move(filepath, best_file_path)
 
-        print("Updated /best_out")
+    print("Updated /best_out" + str(counter))
